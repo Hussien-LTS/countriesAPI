@@ -1,12 +1,13 @@
 const axios = require("axios").default;
 
+const allCountryURL = "https://restcountries.com/v3.1/all";
 const countryURLByName = "https://restcountries.com/v3.1/name";
 const countryURLByCapital = "https://restcountries.com/v3.1/capital";
 const countryURLByLanguage = "https://restcountries.com/v3.1/lang";
 
 async function httpGetAllCountriesByName(req, res) {
   try {
-    const { name } = req.body;
+    const { name } = req.params;
 
     const result = await axios.get(`${countryURLByName}/${name}`);
     console.log("in function data", result.data);
@@ -132,8 +133,33 @@ async function httpGetAllCountriesByLanguage(req, res) {
   }
 }
 
+async function httpGetAllCountries(req, res) {
+  try {
+    const result = await axios.get(allCountryURL);
+    let CountriesArray = result.data.map((data) => {
+      let name = data.name.common;
+      let capital = data.capital ? data.capital[0] : "";
+      let flag = data.flags.png;
+      
+      return {
+        name,
+        capital,
+        flag,
+      };
+    });
+    // console.log("------------", CountriesArray[0]);
+    return res.status(200).json(CountriesArray);
+  } catch (error) {
+    return res.status(404).json({
+      error: error,
+      statusCode: 404,
+    });
+  }
+}
+
 module.exports = {
   httpGetAllCountriesByName,
   httpGetAllCountriesByCapital,
   httpGetAllCountriesByLanguage,
+  httpGetAllCountries,
 };
